@@ -47,9 +47,9 @@ func (m *mockBadCloudFormationClient) WaitUntilStackCreateComplete(*cloudformati
 }
 
 func TestCloudformationCreateStack(t *testing.T) {
-	executor := CFExecutor{Client: &mockGoodCloudFormationClient{}}
+	executor := IaaSExecutor{Client: &mockGoodCloudFormationClient{}}
 
-	err := executor.CreateStack(templateBody, stackName, nil)
+	err := executor.CreateStack(templateBody, stackName, nil, nil)
 	if err != nil {
 		t.Log("Successful stack request return error ", err.Error())
 		t.Fail()
@@ -58,9 +58,9 @@ func TestCloudformationCreateStack(t *testing.T) {
 }
 
 func TestCloudformationCreateStackFails(t *testing.T) {
-	executor := CFExecutor{Client: &mockBadCloudFormationClient{}}
+	executor := IaaSExecutor{Client: &mockBadCloudFormationClient{}}
 
-	err := executor.CreateStack(templateBody, stackName, nil)
+	err := executor.CreateStack(templateBody, stackName, nil, nil)
 	if err == nil {
 		t.Log("Error should have been returned")
 		t.Fail()
@@ -68,9 +68,9 @@ func TestCloudformationCreateStackFails(t *testing.T) {
 
 }
 func TestCloudformationUpdateStack(t *testing.T) {
-	executor := CFExecutor{Client: &mockGoodCloudFormationClient{}}
+	executor := IaaSExecutor{Client: &mockGoodCloudFormationClient{}}
 
-	err := executor.UpdateStack(templateBody, stackName, nil)
+	err := executor.UpdateStack(templateBody, stackName, nil, nil)
 	if err != nil {
 		t.Log("Successful stack request return error ", err.Error())
 		t.Fail()
@@ -79,9 +79,9 @@ func TestCloudformationUpdateStack(t *testing.T) {
 }
 
 func TestCloudformationUpdateStackFails(t *testing.T) {
-	executor := CFExecutor{Client: &mockBadCloudFormationClient{}}
+	executor := IaaSExecutor{Client: &mockBadCloudFormationClient{}}
 
-	err := executor.UpdateStack(templateBody, stackName, nil)
+	err := executor.UpdateStack(templateBody, stackName, nil, nil)
 	if err == nil {
 		t.Log("Error should have been returned")
 		t.Fail()
@@ -92,7 +92,7 @@ func TestCloudformationUpdateStackFails(t *testing.T) {
 //PauseUntilCreateFinished tests, mocks, and methods
 
 func TestCloudformationWaitUntilStackCreateComplete(t *testing.T) {
-	executor := CFExecutor{Client: &mockGoodCloudFormationClient{}}
+	executor := IaaSExecutor{Client: &mockGoodCloudFormationClient{}}
 
 	err := executor.PauseUntilCreateFinished(stackName)
 	if err != nil {
@@ -102,7 +102,7 @@ func TestCloudformationWaitUntilStackCreateComplete(t *testing.T) {
 
 }
 func TestCloudformationWaitUntilStackCreateCompleteFails(t *testing.T) {
-	executor := CFExecutor{Client: &mockBadCloudFormationClient{}}
+	executor := IaaSExecutor{Client: &mockBadCloudFormationClient{}}
 
 	err := executor.PauseUntilCreateFinished(stackName)
 	if err == nil {
@@ -113,7 +113,10 @@ func TestCloudformationWaitUntilStackCreateCompleteFails(t *testing.T) {
 }
 
 func TestCreateTagsLength(t *testing.T) {
-	tags := createTags()
+	m := map[string]string{
+		"TAG": "VALUE",
+	}
+	tags := createTags(&m)
 
 	if len(tags) != 1 {
 		t.Log("invalid number of tags")
@@ -121,18 +124,24 @@ func TestCreateTagsLength(t *testing.T) {
 	}
 }
 func TestCreateTagsKey(t *testing.T) {
-	tags := createTags()
+	m := map[string]string{
+		"TAG": "VALUE",
+	}
+	tags := createTags(&m)
 	key := *tags[0].Key
-	if key != amazonianKey {
-		t.Log("invalid number key expected ", amazonianKey, " found ", key)
+	if key != "TAG" {
+		t.Log("invalid number key expected TAG", " found ", key)
 		t.Fail()
 	}
 }
 func TestCreateTagsValue(t *testing.T) {
-	tags := createTags()
+	m := map[string]string{
+		"TAG": "VALUE",
+	}
+	tags := createTags(&m)
 	value := *tags[0].Value
-	if value != amazonianValue {
-		t.Log("invalid number value expected ", amazonianValue, " found ", value)
+	if value != "VALUE" {
+		t.Log("invalid number value expected VALUE found ", value)
 		t.Fail()
 	}
 }

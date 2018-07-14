@@ -10,11 +10,6 @@ import (
 	"fmt"
 )
 
-const (
-	amazonianKey   = "resource"
-	amazonianValue = "amazonian"
-)
-
 //Executor is an interface to execute and create stacks
 type Executor interface {
 	CreateStack(templateBody string, stackName string, parameters []*cloudformation.Parameter) error
@@ -24,13 +19,15 @@ type Executor interface {
 	PauseUntilUpdateFinished(stackName string) error
 }
 
-//CFExecutor struct used to create cloudformation stacks
-type CFExecutor struct {
+//IaaSExecutor struct used to create cloudformation stacks
+type IaaSExecutor struct {
 	Client cloudformationiface.CloudFormationAPI
 }
 
 //UpdateStack is a method to update Cloudformation stack
-func (executor CFExecutor) UpdateStack(templateBody string, stackName string, parameters []*cloudformation.Parameter) error {
+func (executor IaaSExecutor) UpdateStack(templateBody string, stackName string,
+	parameters []*cloudformation.Parameter, tags *map[string]string) error {
+
 	//generate cloudformation CreateStackInput to be used to create stack
 	input := &cloudformation.UpdateStackInput{}
 
@@ -38,7 +35,9 @@ func (executor CFExecutor) UpdateStack(templateBody string, stackName string, pa
 	input.SetStackName(*aws.String(stackName))
 	input.SetParameters(parameters)
 	input.SetCapabilities(createCapability())
-	input.SetTags(createTags())
+	if tags != nil {
+		input.SetTags(createTags(tags))
+	}
 	//todo-refactor to return output
 	_, err := executor.Client.UpdateStack(input)
 	//if there's an error return it
@@ -51,7 +50,8 @@ func (executor CFExecutor) UpdateStack(templateBody string, stackName string, pa
 }
 
 //CreateStack is a general method to create aws cloudformation stacks
-func (executor CFExecutor) CreateStack(templateBody string, stackName string, parameters []*cloudformation.Parameter) error {
+func (executor IaaSExecutor) CreateStack(templateBody string, stackName string,
+	parameters []*cloudformation.Parameter, tags *map[string]string) error {
 	//generate cloudformation CreateStackInput to be used to create stack
 	input := &cloudformation.CreateStackInput{}
 
@@ -59,7 +59,9 @@ func (executor CFExecutor) CreateStack(templateBody string, stackName string, pa
 	input.SetStackName(*aws.String(stackName))
 	input.SetParameters(parameters)
 	input.SetCapabilities(createCapability())
-	input.SetTags(createTags())
+	if tags != nil {
+		input.SetTags(createTags(tags))
+	}
 	//todo-refactor to return output
 	_, err := executor.Client.CreateStack(input)
 	//if there's an error return it
@@ -73,7 +75,7 @@ func (executor CFExecutor) CreateStack(templateBody string, stackName string, pa
 }
 
 //PauseUntilCreateFinished is a method to wait on the status of a cloudformation stack until it finishes
-func (executor CFExecutor) PauseUntilCreateFinished(stackName string) error {
+func (executor IaaSExecutor) PauseUntilCreateFinished(stackName string) error {
 	fmt.Println("Waiting for stack to be created")
 
 	// Wait until stack is created
@@ -87,7 +89,7 @@ func (executor CFExecutor) PauseUntilCreateFinished(stackName string) error {
 }
 
 //PauseUntilUpdateFinished is a method to wait on the status of a cloudformation stack until it finishes
-func (executor CFExecutor) PauseUntilUpdateFinished(stackName string) error {
+func (executor IaaSExecutor) PauseUntilUpdateFinished(stackName string) error {
 	fmt.Println("Waiting for stack to be updated")
 
 	// Wait until stack is created
@@ -109,10 +111,11 @@ func createCapability() []*string {
 	return capabilities
 }
 
-func createTags() []*cloudformation.Tag {
+//helper method to convert a map of tags into cloudformation tags
+func createTags(tagMap *map[string]string) []*cloudformation.Tag {
 	tags := make([]*cloudformation.Tag, 0)
-	key := amazonianKey
-	value := amazonianValue
-	tags = append(tags, &cloudformation.Tag{Key: &key, Value: &value})
+	for key, value := range *tagMap {
+		tags = append(tags, &cloudformation.Tag{Key: &key, Value: &value})
+	}
 	return tags
 }
