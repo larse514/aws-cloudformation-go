@@ -59,7 +59,7 @@ func (executor IaaSExecutor) CreateStack(templateBody string, stackName string,
 	input.SetStackName(*aws.String(stackName))
 	input.SetParameters(CreateCloudformationParameters(parameterMap))
 	input.SetCapabilities(createCapability())
-	input.SetChangeSetType("UPDATE")
+	input.SetChangeSetType("CREATE")
 	input.SetChangeSetName(stackName)
 
 	if tags != nil {
