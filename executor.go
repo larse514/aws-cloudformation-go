@@ -12,8 +12,8 @@ import (
 
 //Executor is an interface to execute and create stacks
 type Executor interface {
-	CreateStack(templateBody string, stackName string, parameterMap map[string]string, tags *map[string]string) error
-	UpdateStack(templateBody string, stackName string, parameterMap map[string]string, tags *map[string]string) error
+	CreateStack(templateBody string, stackName string, parameterMap *map[string]string, tags *map[string]string) error
+	UpdateStack(templateBody string, stackName string, parameterMap *map[string]string, tags *map[string]string) error
 
 	PauseUntilCreateFinished(stackName string) error
 	PauseUntilUpdateFinished(stackName string) error
@@ -26,7 +26,7 @@ type IaaSExecutor struct {
 
 //UpdateStack is a method to update Cloudformation stack
 func (executor IaaSExecutor) UpdateStack(templateBody string, stackName string,
-	parameterMap map[string]string, tags *map[string]string) error {
+	parameterMap *map[string]string, tags *map[string]string) error {
 
 	//generate cloudformation CreateStackInput to be used to create stack
 	input := &cloudformation.UpdateStackInput{}
@@ -51,7 +51,7 @@ func (executor IaaSExecutor) UpdateStack(templateBody string, stackName string,
 
 //CreateStack is a general method to create aws cloudformation stacks
 func (executor IaaSExecutor) CreateStack(templateBody string, stackName string,
-	parameterMap map[string]string, tags *map[string]string) error {
+	parameterMap *map[string]string, tags *map[string]string) error {
 	//generate cloudformation CreateStackInput to be used to create stack
 	input := &cloudformation.CreateStackInput{}
 
