@@ -53,27 +53,17 @@ func (executor IaaSExecutor) UpdateStack(templateBody string, stackName string,
 func (executor IaaSExecutor) CreateStack(templateBody string, stackName string,
 	parameterMap *map[string]string, tags *map[string]string) error {
 	//generate cloudformation CreateStackInput to be used to create stack
-	input := &cloudformation.CreateChangeSetInput{}
+	input := &cloudformation.CreateStackInput{}
 
 	input.SetTemplateBody(*aws.String(templateBody))
 	input.SetStackName(*aws.String(stackName))
 	input.SetParameters(CreateCloudformationParameters(parameterMap))
 	input.SetCapabilities(createCapability())
-	input.SetChangeSetType("CREATE")
-	input.SetChangeSetName(stackName)
-
 	if tags != nil {
 		input.SetTags(createTags(tags))
 	}
 	//todo-refactor to return output
-	_, err := executor.Client.CreateChangeSet(input)
-
-	executeInput := &cloudformation.ExecuteChangeSetInput{
-		ChangeSetName: &stackName,
-		StackName:     &stackName,
-	}
-	_, err = executor.Client.ExecuteChangeSet(executeInput)
-
+	_, err := executor.Client.CreateStack(input)
 	//if there's an error return it
 	if err != nil {
 		fmt.Println("Got error creating stack: ", err.Error())
