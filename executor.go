@@ -12,8 +12,8 @@ import (
 
 //Executor is an interface to execute and create stacks
 type Executor interface {
-	CreateStack(templateBody string, stackName string, parameters []*cloudformation.Parameter) error
-	UpdateStack(templateBody string, stackName string, parameters []*cloudformation.Parameter) error
+	CreateStack(templateBody string, stackName string, parameters []*cloudformation.Parameter, tags *map[string]string) error
+	UpdateStack(templateBody string, stackName string, parameters []*cloudformation.Parameter, tags *map[string]string) error
 
 	PauseUntilCreateFinished(stackName string) error
 	PauseUntilUpdateFinished(stackName string) error
