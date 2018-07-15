@@ -67,6 +67,13 @@ func (executor IaaSExecutor) CreateStack(templateBody string, stackName string,
 	}
 	//todo-refactor to return output
 	_, err := executor.Client.CreateChangeSet(input)
+
+	executeInput := &cloudformation.ExecuteChangeSetInput{
+		ChangeSetName: &stackName,
+		StackName:     &stackName,
+	}
+	_, err = executor.Client.ExecuteChangeSet(executeInput)
+
 	//if there's an error return it
 	if err != nil {
 		fmt.Println("Got error creating stack: ", err.Error())
