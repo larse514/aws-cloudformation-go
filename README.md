@@ -2,4 +2,6 @@
 Simple library to facilitate interacting with cloudformation sdk
 
 
-TODO- add tests against interface
+TODO:
+1. add tests against interface
+2. add much better tests for executor implementation
