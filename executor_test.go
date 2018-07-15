@@ -20,7 +20,7 @@ type mockGoodCloudFormationClient struct {
 	cloudformationiface.CloudFormationAPI
 }
 
-func (m *mockGoodCloudFormationClient) CreateStack(*cloudformation.CreateStackInput) (*cloudformation.CreateStackOutput, error) {
+func (m *mockGoodCloudFormationClient) CreateChangeSet(*cloudformation.CreateChangeSetInput) (*cloudformation.CreateChangeSetOutput, error) {
 	return nil, nil
 }
 
