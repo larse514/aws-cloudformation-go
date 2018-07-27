@@ -13,6 +13,8 @@ import (
 //Executor is an interface to execute and create stacks
 type Executor interface {
 	CreateStack(templateBody string, stackName string, parameterMap *map[string]string, tags *map[string]string) error
+	CreateStackFromS3(templateURL string, stackName string, parameterMap *map[string]string, tags *map[string]string) error
+
 	UpdateStack(templateBody string, stackName string, parameterMap *map[string]string, tags *map[string]string) error
 
 	PauseUntilCreateFinished(stackName string) error
@@ -47,6 +49,31 @@ func (executor IaaSExecutor) UpdateStack(templateBody string, stackName string,
 
 	}
 	return nil
+}
+
+//CreateStackFromS3 is a general method to create aws cloudformation stacks
+func (executor IaaSExecutor) CreateStackFromS3(templateURL string, stackName string,
+	parameterMap *map[string]string, tags *map[string]string) error {
+	//generate cloudformation CreateStackInput to be used to create stack
+	input := &cloudformation.CreateStackInput{}
+
+	input.SetTemplateURL(*aws.String(templateURL))
+	input.SetStackName(*aws.String(stackName))
+	input.SetParameters(CreateCloudformationParameters(parameterMap))
+	input.SetCapabilities(createCapability())
+	if tags != nil {
+		input.SetTags(createTags(tags))
+	}
+	//todo-refactor to return output
+	_, err := executor.Client.CreateStack(input)
+	//if there's an error return it
+	if err != nil {
+		fmt.Println("Got error creating stack: ", err.Error())
+		return errors.New("Error creating stack")
+
+	}
+	return nil
+
 }
 
 //CreateStack is a general method to create aws cloudformation stacks

@@ -45,7 +45,31 @@ func (m *mockBadCloudFormationClient) UpdateStack(*cloudformation.UpdateStackInp
 func (m *mockBadCloudFormationClient) WaitUntilStackCreateComplete(*cloudformation.DescribeStacksInput) error {
 	return errors.New("THIS IS AN ERROR")
 }
+func TestCloudformationCreateStackFromS3(t *testing.T) {
+	executor := IaaSExecutor{Client: &mockGoodCloudFormationClient{}}
+	m := map[string]string{
+		"KEY": "VALUE",
+	}
+	err := executor.CreateStackFromS3(templateBody, stackName, &m, nil)
+	if err != nil {
+		t.Log("Successful stack request return error ", err.Error())
+		t.Fail()
+	}
 
+}
+
+func TestCloudformationCreateStackFromS3Fails(t *testing.T) {
+	executor := IaaSExecutor{Client: &mockBadCloudFormationClient{}}
+	m := map[string]string{
+		"KEY": "VALUE",
+	}
+	err := executor.CreateStackFromS3(templateBody, stackName, &m, nil)
+	if err == nil {
+		t.Log("Error should have been returned")
+		t.Fail()
+	}
+
+}
 func TestCloudformationCreateStack(t *testing.T) {
 	executor := IaaSExecutor{Client: &mockGoodCloudFormationClient{}}
 	m := map[string]string{
